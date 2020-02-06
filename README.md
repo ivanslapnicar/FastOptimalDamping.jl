@@ -1,4 +1,4 @@
-# Fast Optimal Damping
+# FastOptimalDamping.jl
 
 Fast computation of optimal damping parameters for linear vibrational systems
 
@@ -14,6 +14,6 @@ Our newly developed algorithm for DPR1 eigenvalue problem uses modified Rayleigh
 The decomposition is updated as many times as there are dumpers, and it is fast (again `O(n^2)` operations) due to fast multiplication of Cauchy-like matrices.
 The algorithm uses multi-threading in a simple and efficient manner.
 
-## Install
+## Installation
 
 `https://github.com/ivanslapnicar/Fast-Optimal-Damping.git`
