@@ -16,4 +16,4 @@ The algorithm uses multi-threading in a simple and efficient manner.
 
 ## Installation
 
-`https://github.com/ivanslapnicar/Fast-Optimal-Damping.git`
+`https://github.com/ivanslapnicar/FastOptimalDamping.jl.git`
