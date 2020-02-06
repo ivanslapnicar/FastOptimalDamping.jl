@@ -1,4 +1,4 @@
-# Fast-Optimal-Damping
+# Fast Optimal Damping
 
 Fast computation of optimal damping parameters for linear vibrational systems
 
@@ -12,4 +12,8 @@ The optimization of viscosities is an order of magnitude faster that the standar
 The algorithm uses eigenvalue decomposition of `n-by-n` complex symmetric diagonal-plus-rank one (DPR1) matrix.
 Our newly developed algorithm for DPR1 eigenvalue problem uses modified Rayleigh quotient iteration and stores eigenvectors as a Cauchy-like matrix, having complexity of `O(n^2)` operations.
 The decomposition is updated as many times as there are dumpers, and it is fast (again `O(n^2)` operations) due to fast multiplication of Cauchy-like matrices.
-The algorithm uses multi-threading in a simple and efficient manner. 
+The algorithm uses multi-threading in a simple and efficient manner.
+
+## Install
+
+`https://github.com/ivanslapnicar/Fast-Optimal-Damping.git`
