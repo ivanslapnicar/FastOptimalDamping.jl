@@ -1,5 +1,5 @@
-# Generate Small example, d=400, n=801, 2n=1602
-example='S'
+# Generate Small example, d=1000, n=2001, 2n=4002
+example='H'
 K,M=GenerateExamples(example)
 
 # Create DampedSystem structure
@@ -23,7 +23,7 @@ println("Second timing is relevant\n")
 
 # Computation of trace(X) for a single damper in position l with viscosity ρ, and
 # the number of damped frequencies s
-s=27
+s=20
 
 function f(ρ::Number)
     A=CSymDPR1(Ξ,Φ[l,:],ComplexF64(ρ))
@@ -42,11 +42,11 @@ println("Second timing is relevant.\n")
 # the number of damped frequencies s
 
 # Positions of dampers and viscosities
-l=[50,550,120]
+l=[850,1950,20]
 ρ=[100.0,200.0,300.0]
 
 # Auxiliary arrays
-n₁=400
+n₁=1000
 n=2*n₁+1
 U=Matrix{T}(undef,2n,length(l))
 Uvec=Matrix{T}(undef,2n,length(l))
@@ -81,7 +81,7 @@ println("Second timing is relevant.\n")
 @time Tr=f(ρ)
 
 # Optimization. Given starting ρ, we compute the optmial viscosities
-ρ=[100.0,100,100]
+ρ=[500.0,500,500]
 println("\nTime for optimization of viscosities for three dampers.\n")
 @time result=optimize(f,ρ,method=ConjugateGradient(eta=0.01),
     x_tol=1e-2,f_tol=1e-6)

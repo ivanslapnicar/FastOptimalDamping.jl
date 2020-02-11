@@ -1,5 +1,5 @@
-# Generate Small example, d=400, n=801, 2n=1602
-example='S'
+# Generate Small example, d=800, n=1601, 2n=3202
+example='L'
 K,M=GenerateExamples(example)
 
 # Create DampedSystem structure
@@ -42,11 +42,11 @@ println("Second timing is relevant.\n")
 # the number of damped frequencies s
 
 # Positions of dampers and viscosities
-l=[50,550,120]
+l=[50,950,220]
 ρ=[100.0,200.0,300.0]
 
 # Auxiliary arrays
-n₁=400
+n₁=800
 n=2*n₁+1
 U=Matrix{T}(undef,2n,length(l))
 Uvec=Matrix{T}(undef,2n,length(l))

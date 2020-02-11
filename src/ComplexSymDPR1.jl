@@ -25,15 +25,6 @@ function getindex(A::CSymDPR1,i::Integer,j::Integer)
     return i == j ? A.D[i] + Aij : Aij
 end # getindex
 
-# Dense version of CSymDPR1
-# Slow
-# full(A::CSymDPR1) = [A[i,j] for i = 1:size(A,1), j = 1:size(A,2)]
-# fast but with 3 allocations
-# Matrix(A::CSymDPR1)= diagm(0=>A.D)+A.ρ*(A.u*transpose(A.u))
-# Faster with one allocation
-# Unsymmetric
-# Matrix(A::CSymDPR1)= BLAS.ger!(A.ρ,A.u,conj(A.u),diagm(0=>A.D))
-# Symmetric
 Matrix(A::CSymDPR1)= Matrix(Symmetric(BLAS.syr!('U',A.ρ,A.u,diagm(0=>A.D))))
 transpose(A::CSymDPR1{T}) where T = A
 
@@ -153,13 +144,11 @@ function mrqi!(z::Vector{T}, Du::Vector{T}, A::CSymDPR1{T}, λ::T) where T
         end
         Du[l] = A.u[l]/τ #  (A.D[l] - λ)
     end
-    # @show normalize(Du)
     dotd= (T==Float64) ? BLAS.dot : BLAS.dotu
     γ=A.ρ*dotd(z,Du)/(one(T)+A.ρ*dotd(A.u,Du))
     if abs(γ)<1e-4 || abs(γ)>1e4 || isnan(γ)
         @inbounds for l=1:n
             z[l]=Du[l]
-            # println(" standard")
         end
     else
         @inbounds for l=1:n
@@ -182,7 +171,6 @@ function rqi(z::Vector{T}, z₁::Vector{T}, τ::Vector{T}, A::CSymDPR1{T} ,λ::T
     n=length(A.D)
     dpr1vector!(z,A,λ)
     δ = xtAxc(A, z)
-    # @show hh=z'*z
     if count(isequal(δ),A.D)>0
         λ=δ
         return λ
@@ -231,53 +219,25 @@ function eigvals(A1::CSymDPR1)
     maxiter = 101
 
     for l in 1:n
-        # @show l
         copyto!(AD,A.D)
         # Shift to the absolutely largest pole
-        # t = findmax(abs.(A.D))[2]
-        #=
-        if l==lsave
-            return A
-        end
-        =#
         t=1
         μ = A.D[t]
-        # @show μ=zero(typeof(A.D[t]))
         for i in 1:m
             A.D[i] -= μ
         end
-        # C=CSymDPR1(A.D-μ,A.u,A.r)
         for i=1:m
             z[i]=zero(T)
         end
-        # z = zeros(T, m)
         z[t]=one(T)
-        #=
-        if l==80200  # 369
-            # z[4]=one(T)
-            z=ones(T,m)./sqrt(float(m))
-            # z=A.u./AD
-        else
-            z[t] = one(T)
-        end
-        =#
-        # z=A.u
-        # z=ones(T,m)./sqrt(float(m))
         k = 1
         δ = one(T)
         γ = zero(T)
-        while k < maxiter && abs(δ)>tol   #/abs(γ) > tol
+        while k < maxiter && abs(δ)>tol
             # use z^T
             ν = dotd(z, z)
             δ = xtAx(A, z)/ν
             γ += δ
-            #=
-            if l==lshow
-                println(k," ",δ," ",γ," ",ν," ") # ,ν,μ,xtAx(A,z),xtAxc(A,z))
-            end
-            =#
-            # @show ν,δ,γ,A.D
-            # z = dpr1vector(C, δ)
             mrqi!(z, Du, A, δ)
             for i in 1:m
                 A.D[i] -= δ
@@ -285,26 +245,22 @@ function eigvals(A1::CSymDPR1)
 
             k += 1
         end
-        # @show k
         if k==maxiter
             println(l," ",abs(δ)," ",tol)
         end
-        # @show μ,γ
         λ[l] = μ + γ
 
         # Deflation - eliminating absolutely largest pole
-        # @show findmin(abs.(AD.-λ[l])),AD[1]-λ[l]
-        # t=findmin(abs.(AD.-λ[l]))[2]
         @inbounds for i in 1:(t - 1)
             d[i] = A.u[i]/sqrt(one(T) - γ/(AD[i] - μ))
-            if isnan(d[i]) # || abs(d[i])<eps()
+            if isnan(d[i])
                 println(l," nan")
                 d[i]=zero(T)
             end
         end
         @inbounds for i in (t + 1):m
             d[i-1] = A.u[i]/sqrt(one(T) - γ/(AD[i] - μ))
-            if isnan(d[i-1]) # || abs(d[i-1])<eps()
+            if isnan(d[i-1])
                 d[i-1]=zero(T)
             end
         end
@@ -333,7 +289,6 @@ function eigvals(A1::CSymDPR1)
         μ=λ[l]
         λ[l]=rqi(z₀[tid],z₁[tid],τ[tid],A1,μ)
     end
-
     return λ
 end
 
@@ -363,7 +318,7 @@ function eigen(A::CSymDPR1{T}) where T
     # as Cauchy-like matrix
     Λ=eigvals(A)
     n=length(A.D)
-    # Boley-Golub lemma
+    # Boley-Golub Lemma
     z=Vector{T}(undef,n)
     Threads.@threads for i=1:n
         δ=A.D[i]
@@ -376,8 +331,6 @@ function eigen(A::CSymDPR1{T}) where T
         end
         τ/=A.ρ
         τ=sqrt(τ)
-        # τ=sqrt((Λ[i]-A.D[i])*prod([(Λ[j]-A.D[i])/(A.D[j]-A.D[i])
-        #    for j in [1:i-1;i+1:n]])/A.ρ)
         if isnan(τ)
             # println(" nan ")
             z[i]=A.u[i]
@@ -389,13 +342,11 @@ function eigen(A::CSymDPR1{T}) where T
             end
         end
     end
-    # z=A.u
 
     nz=norm(A.u-z,Inf)
     if nz>100*eps()
-        println("warning: nz=",nz)
+        # println("warning: nz=",nz)
     end
-    # z=A.u
     X=CauchyLike(A.D,Λ,z,ones(T,length(A.u)))
     scale!(X)
     return Λ,X
@@ -411,19 +362,15 @@ function traceX(S::CauchyLike{T},s::Int) where T
         getindex!(a[tid],S,:,i)
         G[i,:].=view(a[tid],[1:s;n+1:n+s])
     end
-    # Y=CauchyLike(S.y,-conj(S.y),-G,G);
     Y=CauchyLikeS(S.y,G,conj(G))
-    # U clanku trace(X)=trace(SYS')=trace(S'(SY))
+    # trace(X)=trace(SYS')=trace(S'(SY))
     S₁=S*Y
     traceX=zeros(T,Threads.nthreads())
-    # Ovo je nestabilno s Threads - izgleda OK u 1.1
     Threads.@threads for i=1:2n
         tid=Threads.threadid()
         getindex!(a[tid],S,:,i)
         getindex!(b[tid],S₁,:,i)
         traceX[tid]+=BLAS.dotc(a[tid],b[tid])
-        # traceX[i]=BLAS.dotc(a[tid],b[tid])
     end
     return sum(traceX)
 end
-# end # module

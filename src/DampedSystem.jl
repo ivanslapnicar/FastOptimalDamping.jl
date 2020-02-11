@@ -9,7 +9,6 @@ function ChangeOfBasis(S::DampedSystem)
     T=Complex{Float64}
     n=size(S.K,1)
     # Solve the GEVD
-    # Ω2,Φ=eig(full(S.K),full(S.M))
     Kf=deepcopy(S.K)
     for i=1:n,j=1:n
         Kf[j,i]/=(sqrt(S.M.diag[j]*S.M.diag[i]))
@@ -19,7 +18,6 @@ function ChangeOfBasis(S::DampedSystem)
     Ω=sqrt.(Ω2)
     # Γ is diagonal in the Φ basis
     # Γ=diag(Φ'*D_int*Φ)
-    # Novo za Zorana
     α=0.02
     Γ=α*Ω
     # Form the matrices Ξ and Q
