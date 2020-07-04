@@ -1,7 +1,7 @@
 struct DampedSystem{T}
     M::AbstractMatrix{T} # Mass matrix
     K::AbstractMatrix{T} # Stiffness matrix
-    D::AbstractMatrix{T} # Internal damping matrix
+    D::AbstractMatrix{T} # Internal damping matrix, currently unused
 end
 
 using SparseArrays
@@ -25,12 +25,15 @@ function ChangeOfBasis(S::DampedSystem)
     Q=spzeros(T,2n,2n)
     # Solve small 2x2 hyperbolic GEVDs
     # Q is kept as a sparse matrix
+    # These are direct formulas for the case (3) and (10)
+    γ=(sqrt(2.0-α)*sqrt(2.0+α)*im-α)*0.5
+    c₁=sqrt((1-conj(γ))*(1+conj(γ)))
+    c₂=sqrt((1-γ)*(1+γ))
+    Q₂=[1.0/c₁ 1.0/c₂; conj(γ)/c₁ γ/c₂]
     for k=1:n
-        Ξ[[k,n+k]],Q[[k,n+k],[k,n+k]]=eigen([0 Ω[k];  Ω[k] Γ[k]], [1.0 0; 0 -1])
-        # Transform Q such that Q^T*[I 0;0 -I]*Q=I
-        Θ=diag(transpose(Q[[k,n+k],[k,n+k]])*[1.0 0; 0 -1]*Q[[k,n+k],[k,n+k]])
-        Q[[k,n+k],k]./=sqrt(Θ[1])
-        Q[[k,n+k],n+k]./=sqrt(Θ[2])
+        Ξ[k]=conj(γ)*Ω[k]
+        Ξ[n+k]=γ*Ω[k]
+        Q[[k,n+k],[k,n+k]]=Q₂
     end
     Φ=Φ*Q[n+1:2n,:]
     return Ω,Φ,Ξ,Q

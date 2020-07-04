@@ -43,7 +43,8 @@ println("Second timing is relevant.\n")
 
 # Positions of dampers and viscosities
 l=[50,550,120]
-ρ=[100.0,200.0,300.0]
+# ρ=[100.0,200.0,300.0]
+ρ=[561.332,651.74,310.657]
 
 # Auxiliary arrays
 n₁=400
@@ -56,6 +57,7 @@ function f(ρ::Vector)
     U[:,1]=Φ[l[1],:]
     A=CSymDPR1(Ξ,Φ[l[1],:],ComplexF64(ρ[1]))
     Λ,S=eigen(A)
+@show cond(Matrix(S))
     y=similar(Λ)
     # Loop
     for j=2:length(l)
@@ -67,8 +69,10 @@ function f(ρ::Vector)
         Uvec[:,j]=y
         A=CSymDPR1(Λ,y,ComplexF64(ρ[j]))
         Λ,S₁=eigen(A)
+        @show cond(Matrix(S₁))
         # Multiplication of linked Cauchy-like matrices
         S=S*S₁
+        @show cond(Matrix(S))
     end
     Tr=traceX(S,s)
     println("ρ = ", ρ," trace = ", Tr)
@@ -80,6 +84,7 @@ println("Second timing is relevant.\n")
 @time Tr=f(ρ)
 @time Tr=f(ρ)
 
+#=
 # Optimization. Given starting ρ, we compute the optmial viscosities
 ρ=[100.0,100,100]
 println("\nTime for optimization of viscosities for three dampers.\n")
@@ -89,3 +94,4 @@ println("\nTime for optimization of viscosities for three dampers.\n")
 println(result)
 println("\nOptimal viscosities: ",result.minimizer)
 println("\nMinimal trace: ", result.minimum)
+=#

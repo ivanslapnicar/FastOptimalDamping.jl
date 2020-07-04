@@ -349,7 +349,7 @@ function eigen(A::CSymDPR1{T}) where T
     end
     X=CauchyLike(A.D,Λ,z,ones(T,length(A.u)))
     scale!(X)
-    return Λ,X
+    return Eigen(Λ,X)
 end
 
 function traceX(S::CauchyLike{T},s::Int) where T

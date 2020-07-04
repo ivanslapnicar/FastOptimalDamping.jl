@@ -1,0 +1,30 @@
+Time of single eigenvalue decomposition of a CSymDPR1 matrix.
+Second timing is relevant
+
+  0.261856 seconds (7.74 k allocations: 919.656 KiB)
+  0.263544 seconds (7.74 k allocations: 919.656 KiB)
+
+Time of trace computation for a single damper.
+Second timing is relevant.
+
+  0.433115 seconds (47.20 k allocations: 13.575 MiB)
+  0.423263 seconds (47.21 k allocations: 13.576 MiB)
+
+Time of trace computation for three dampers.
+Second timing is relevant.
+
+cond(Matrix(S)) = 9.182662654453598
+cond(Matrix(S₁)) = 14.82712366886014
+cond(Matrix(S)) = 14.341212737229588
+cond(Matrix(S₁)) = 82.12862063449164
+cond(Matrix(S)) = 56.5598696756643
+ρ = [100.0, 200.0, 300.0] trace = 75191.84473400883 - 3.3743496798827044e-9im
+ 19.532195 seconds (217.39 k allocations: 503.870 MiB, 1.36% gc time)
+cond(Matrix(S)) = 9.182662654453598
+cond(Matrix(S₁)) = 14.82712366886014
+cond(Matrix(S)) = 14.341212737229588
+cond(Matrix(S₁)) = 82.12862063449164
+cond(Matrix(S)) = 56.5598696756643
+ρ = [100.0, 200.0, 300.0] trace = 75191.84473400883 - 3.3743496798827044e-9im
+ 19.409160 seconds (146.17 k allocations: 500.434 MiB, 0.88% gc time)
+75191.84473400883

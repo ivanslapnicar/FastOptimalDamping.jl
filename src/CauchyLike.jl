@@ -5,8 +5,12 @@ import LinearAlgebra: mul!
 struct CauchyLike{T} <: AbstractMatrix{T}
     x::Vector{T}
     y::Vector{T}
-    r::Array{T}  #ovaj ulaz može biti vektor ili matrica
-    s::Array{T}  #ovaj ulaz može biti vektor ili matrica
+    r::Array{T}  # Vector or Matrix
+    s::Array{T}  # Vector or Matrix
+    # s[i,:] needs to be zero row when x[i]=y[i]
+    function CauchyLike{T}(x::Vector{T}, y::Vector{T},r::Array{T}, s::Array{T}) where T
+        new(x, y, r, s.*(.!iszero.(x-y)))
+    end
 end # struct
 
 size(A::CauchyLike{T}, dim::Integer) where T = dim==1 ? length(A.x) : length(A.y)
@@ -14,8 +18,8 @@ size(A::CauchyLike{T}) where T = size(A,1), size(A,2)
 
 struct CauchyLikeS{T} <: AbstractMatrix{T}
     x::Vector{T}
-    r::AbstractArray{T}  # ovaj ulaz može biti vektor ili matrica
-    s::AbstractArray{T}  # s=conj(r) tako da je kasnije brže
+    r::AbstractArray{T}  # Vector or Matrix
+    s::AbstractArray{T}  # s=conj(r) so that the later computation is fsaster
 end # struct
 
 # Define its size
@@ -108,6 +112,10 @@ end # getindex
 
 
 # Submatrices
+# The following three functions are accurate ONLY when A.x .!= A.y
+# If A.x[i]=A.y[i] for some iu, then the functions return A[i,i] as NaN. In this
+# case, we set the true column A[:,i] to be the i-th canonical vector. The function
+# getindex!(y,A,:,i) returns correct column in y.
 function getindex(A::CauchyLike{T},i::Union{UnitRange,Vector{Int},Colon},
     j::Union{UnitRange,Vector{Int},Colon}) where T
     return CauchyLike(A.x[i],A.y[j],A.r[i,:],A.s[j,:])
@@ -115,12 +123,12 @@ end # getindex
 
 # Column
 function getindex(A::CauchyLike{T},i::Colon,j::Int) where T
-    return (A.r*A.s[j,:]')./(A.x.-A.y[j])
+    return (A.r*conj(A.s[j,:]))./(A.x.-A.y[j])
 end # getindex
 
 # Row
 function getindex(A::CauchyLike{T},i::Int,j::Colon) where T
-    return (A.r[i]*A.s')./(A.x[i].-A.y)
+    return (transpose(view(A.r,i,:))*A.s')./transpose(A.x[i].-A.y)
 end # getindex
 
 # Column in place
@@ -214,22 +222,10 @@ end
 function *(A::CauchyLike{T}, x::Matrix{T}) where T
     # This could be improved?
     # It works well for narrow x
-    dotd= T==ComplexF64 ? BLAS.dotc : BLAS.dot
     n=size(A,1)
-    a=[Vector{T}(undef,n) for i=1:Threads.nthreads()]
     y=similar(x)
-    #=
     for i=1:size(x,2)
         y[:,i]=A*view(x,:,i)
-    end
-    =#
-    Threads.@threads for i=1:n
-        tid=Threads.threadid()
-        getindex!(a[tid],A,:,i)
-        for j=1:size(y,2)
-            # ne poziva se - c ili u
-            y[i,j]=dotd(a[tid],view(x,:,j))
-        end
     end
     return y
 end
@@ -302,7 +298,7 @@ function Ac_mul_B!(y::Matrix{T},A::CauchyLike{T},x::Matrix{T}) where T
         tid=Threads.threadid()
         getindex!(a[tid],A,:,i)
         for j=1:size(y,2)
-            # ne poziva se - c ili u
+            #
             y[i,j]=dotd(a[tid],x[:,j])
         end
     end

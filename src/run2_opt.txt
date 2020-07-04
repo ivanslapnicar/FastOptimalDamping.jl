@@ -1,0 +1,27 @@
+julia> include("LargeExample.jl")
+Time of single eigenvalue decomposition of a CSymDPR1 matrix.
+Second timing is relevant
+
+  0.981208 seconds (18.08 k allocations: 1.890 MiB)
+  0.971888 seconds (18.08 k allocations: 1.890 MiB)
+
+Time of trace computation for a single damper.
+Second timing is relevant.
+
+  1.813707 seconds (106.18 k allocations: 27.506 MiB, 3.76% gc time)
+  1.820465 seconds (106.18 k allocations: 27.506 MiB)
+
+Time of trace computation for three dampers.
+Second timing is relevant.
+
+cond(Matrix(S)) = 48.766838228404154
+cond(Matrix(S)) = 48.76327545757176
+cond(Matrix(S)) = 112.57164335677837
+ρ = [721.06, 656.872, 415.489] trace = 154743.67563009338 - 8.712377534865479e-7im
+ 79.736489 seconds (334.62 k allocations: 1.276 GiB, 0.47% gc time)
+cond(Matrix(S)) = 48.766838228404154
+cond(Matrix(S)) = 48.76327545757176
+cond(Matrix(S)) = 112.57164335677837
+ρ = [721.06, 656.872, 415.489] trace = 154743.67563009338 - 8.712377534865479e-7im
+ 80.949786 seconds (307.59 k allocations: 1.275 GiB, 0.27% gc time)
+154743.67563009338

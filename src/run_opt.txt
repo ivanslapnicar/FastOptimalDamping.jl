@@ -1,0 +1,63 @@
+include("SmallExample.jl")
+Time of single eigenvalue decomposition of a CSymDPR1 matrix.
+Second timing is relevant
+
+  0.280469 seconds (7.74 k allocations: 919.656 KiB)
+  0.270231 seconds (7.74 k allocations: 919.656 KiB)
+
+Time of trace computation for a single damper.
+Second timing is relevant.
+
+  0.444959 seconds (47.21 k allocations: 13.575 MiB)
+  0.442403 seconds (47.21 k allocations: 13.576 MiB)
+
+Time of trace computation for three dampers.
+Second timing is relevant.
+
+cond(Matrix(S)) = 484.2627031496917
+cond(Matrix(S₁)) = 3.585162224360543
+cond(Matrix(S)) = 484.2607741626264
+cond(Matrix(S₁)) = 51.884046795950425
+cond(Matrix(S)) = 628.5061969654043
+ρ = [561.4, 651.8, 310.6] trace = 66434.85900139043 + 1.5099431038834155e-8im
+ 19.929137 seconds (175.50 k allocations: 501.860 MiB, 0.32% gc time)
+cond(Matrix(S)) = 484.2627031496917
+cond(Matrix(S₁)) = 3.585162224360543
+cond(Matrix(S)) = 484.2607741626264
+cond(Matrix(S₁)) = 51.884046795950425
+cond(Matrix(S)) = 628.5061969654043
+ρ = [561.4, 651.8, 310.6] trace = 66434.85900139043 + 1.5099431038834155e-8im
+ 20.010264 seconds (146.27 k allocations: 500.438 MiB, 0.32% gc time)
+66434.85900139043
+
+julia> include("SmallExample.jl")
+Time of single eigenvalue decomposition of a CSymDPR1 matrix.
+Second timing is relevant
+
+  0.279405 seconds (7.74 k allocations: 919.641 KiB)
+  0.266394 seconds (7.74 k allocations: 919.641 KiB)
+
+Time of trace computation for a single damper.
+Second timing is relevant.
+
+  0.449580 seconds (47.20 k allocations: 13.575 MiB)
+  0.444598 seconds (47.20 k allocations: 13.575 MiB)
+
+Time of trace computation for three dampers.
+Second timing is relevant.
+
+cond(Matrix(S)) = 468.46177440859907
+cond(Matrix(S₁)) = 3.5859912520788795
+cond(Matrix(S)) = 468.45979546457215
+cond(Matrix(S₁)) = 51.896917885764566
+cond(Matrix(S)) = 587.1317089594972
+ρ = [561.332, 651.74, 310.657] trace = 66434.85902936537 - 2.584427534202405e-7im
+ 20.237157 seconds (175.62 k allocations: 501.865 MiB, 0.25% gc time)
+cond(Matrix(S)) = 468.46177440859907
+cond(Matrix(S₁)) = 3.5859912520788795
+cond(Matrix(S)) = 468.45979546457215
+cond(Matrix(S₁)) = 51.896917885764566
+cond(Matrix(S)) = 587.1317089594972
+ρ = [561.332, 651.74, 310.657] trace = 66434.85902936537 - 2.584427534202405e-7im
+ 20.016694 seconds (146.40 k allocations: 500.444 MiB, 0.30% gc time)
+66434.85902936537
