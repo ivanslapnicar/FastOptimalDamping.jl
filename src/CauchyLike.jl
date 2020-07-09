@@ -7,11 +7,10 @@ struct CauchyLike{T} <: AbstractMatrix{T}
     y::Vector{T}
     r::Array{T}  # Vector or Matrix
     s::Array{T}  # Vector or Matrix
-    # s[i,:] needs to be zero row when x[i]=y[i]
-    function CauchyLike{T}(x::Vector{T}, y::Vector{T},r::Array{T}, s::Array{T}) where T
-        new(x, y, r, s.*(.!iszero.(x-y)))
+    function CauchyLike(x::Vector{T}, y::Vector{T},r::Array{T}, s::Array{T}) where T
+        new{T}(x,y,r,s.*(.!iszero.(x-y)))
     end
-end # struct
+end
 
 size(A::CauchyLike{T}, dim::Integer) where T = dim==1 ? length(A.x) : length(A.y)
 size(A::CauchyLike{T}) where T = size(A,1), size(A,2)
