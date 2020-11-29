@@ -16,7 +16,7 @@ The algorithm uses multi-threading in a simple and efficient manner.
 
 ## Installation
 
-`https://github.com/ivanslapnicar/FastOptimalDamping.jl.git`
+`git clone https://github.com/ivanslapnicar/FastOptimalDamping.jl.git`
 
 ## Running tests
 
@@ -36,5 +36,5 @@ To run Julia in multi-threading setting in Linux, include the line
 ```
 export JULIA_NUM_THREADS=`nproc`
 ```
-in your `.bashrc` file. For Windows, set the environment variable 
+in your `.bashrc` file. For Windows, set the environment variable
 `JULIA_NUM_THREADS` to number of CPUs.

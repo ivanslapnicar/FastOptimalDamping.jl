@@ -1,8 +1,7 @@
  # module ComplexDPR1
 
-
 import Base: *, getindex, size, Matrix
-import LinearAlgebra: eigen, eigvals, inv, transpose,mul!
+import LinearAlgebra: eigen, eigvals, inv, transpose, mul!
 
 T=Complex{Float64}
 
@@ -158,8 +157,6 @@ function mrqi!(z::Vector{T}, Du::Vector{T}, A::CSymDPR1{T}, λ::T) where T
     normalize!(z)
 end
 
-
-using Future
 function rqi(z::Vector{T}, z₁::Vector{T}, τ::Vector{T}, A::CSymDPR1{T} ,λ::T) where T
     # Rayleigh Quotient Iteration
     # Returns λ=z'*A*z/z'*z
@@ -175,8 +172,8 @@ function rqi(z::Vector{T}, z₁::Vector{T}, τ::Vector{T}, A::CSymDPR1{T} ,λ::T
         λ=δ
         return λ
     else
-        Future.copy!(z₁,A.u)
-        Future.copy!(τ,A.D)
+        copy!(z₁,A.u)
+        copy!(τ,A.D)
         τ.-=δ
         z₁./=τ
         μ=dotd(A.u,z₁)
@@ -189,7 +186,7 @@ function rqi(z::Vector{T}, z₁::Vector{T}, τ::Vector{T}, A::CSymDPR1{T} ,λ::T
     end
 end
 
-function eigvals(A1::CSymDPR1)
+function eigvals(A₁::CSymDPR1)
     # A is complex and unreduced, that is, A.u.!=0 and
     # all elements of A.D are different.
     # It is better to use z^T A z / z^T z (modified RQI) instead
@@ -199,7 +196,7 @@ function eigvals(A1::CSymDPR1)
     # eigenvector formula
 
     # Preliminaries
-    A=deepcopy(A1)
+    A=deepcopy(A₁)
     n = length(A.D)
     m = n
 
@@ -287,7 +284,7 @@ function eigvals(A1::CSymDPR1)
     Threads.@threads for l=1:n
         tid=Threads.threadid()
         μ=λ[l]
-        λ[l]=rqi(z₀[tid],z₁[tid],τ[tid],A1,μ)
+        λ[l]=rqi(z₀[tid],z₁[tid],τ[tid],A₁,μ)
     end
     return λ
 end

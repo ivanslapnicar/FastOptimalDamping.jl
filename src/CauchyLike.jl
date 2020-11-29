@@ -1,5 +1,5 @@
 import Base: size, transpose, -, *, getindex, Matrix
-import LinearAlgebra: mul!
+import LinearAlgebra: mul!, lmul!
 
 # Define a CauchyLike Matrix Type
 struct CauchyLike{T} <: AbstractMatrix{T}
@@ -33,7 +33,7 @@ function getindex!(y::Vector{T},A::CauchyLikeS{T},i::Colon,j::Int) where T
     α=conj(A.x[j])
     if ndims(A.r)==1
         β=-conj(A.r[j])
-        Future.copy!(y,A.r)
+        copy!(y,A.r)
         y.*=β
         y./=(A.x.+α)
     else
@@ -42,7 +42,7 @@ function getindex!(y::Vector{T},A::CauchyLikeS{T},i::Colon,j::Int) where T
     end
 end # getindex
 
-function Ac_mul_B!(y::Array{T},A::CauchyLikeS{T},x::Array{T}) where T
+function lmul!(y::Array{T},A::CauchyLikeS{T},x::Array{T}) where T
     # Computes y=adjoint(A)*x
     dotd= T==ComplexF64 ? BLAS.dotc : BLAS.dot
     n=size(A,1)
@@ -70,7 +70,7 @@ function *(A::CauchyLike{T},Y::CauchyLikeS{T}) where T
         # M=[A.r [-I,fill(zero(T),2n,s] [fill(zero(T),n,s);-I,fill(zero(T),n-s,s)]]
         # M=[A.r -A*Y.r]
         z=similar(A.s)
-        Ac_mul_B!(z,Y,A.s)
+        lmul!(z,Y,A.s)
         N=[z Y.r]
         return CauchyLike(A.x,-conj(Y.x),M,N)
     else
@@ -124,13 +124,12 @@ function getindex(A::CauchyLike{T},i::Int,j::Colon) where T
 end # getindex
 
 # Column in place
-import Future
 function getindex!(y::Vector{T},A::CauchyLike{T},i::Colon,j::Int) where T
     n=length(A.x)
     α=A.y[j]
     if ndims(A.r)==1
         β=conj(A.s[j])
-        Future.copy!(y,A.r)
+        copy!(y,A.r)
         y.*=β
         y./=(A.x.-α)
         # y=(A.r*conj(A.s[j]))./(A.x.-A.y[j])
@@ -175,7 +174,7 @@ function Matrix(A::CauchyLike{T}) where T
         tid=Threads.threadid()
         getindex!(a[tid],A,:,i)
         # view?
-        # Future.copy!(Z[:,i],a[tid])
+        # copy!(Z[:,i],a[tid])
         Z[:,i]=a[tid]
     end
     return Z
@@ -208,7 +207,7 @@ function mul!(y1::Vector{T}, A::CauchyLike{T}, x::Vector{T}) where T
         getindex!(z[tid],A,:,i)
         BLAS.axpy!(x[i],z[tid],y[tid])
     end
-    Future.copy!(y1,sum(y))
+    copy!(y1,sum(y))
 end
 
 function *(A::CauchyLike{T}, x::Matrix{T}) where T
@@ -243,7 +242,7 @@ function *(A::CauchyLike{T}, B::CauchyLike{T}) where T
         # (aka. V.Pan, A.Zheng)
         M=[A.r (A*B.r)]
         N=similar(A.s)
-        Ac_mul_B!(N,B,A.s)
+        lmul!(N,B,A.s)
         N=hcat(N, B.s)
         C=CauchyLike(A.x,B.y,M,N)
         return C
@@ -259,7 +258,7 @@ function *(A::CauchyLike{T}, B::CauchyLike{T}, y::Vector{T}) where T
         # (aka. V.Pan, A.Zheng)
         M=[A.r y]
         N=similar(A.s)
-        Ac_mul_B!(N,B,A.s)
+        lmul!(N,B,A.s)
         N=hcat(N, B.s)
         C=CauchyLike(A.x,B.y,M,N)
         return C
@@ -269,7 +268,7 @@ function *(A::CauchyLike{T}, B::CauchyLike{T}, y::Vector{T}) where T
     end
 end
 
-function At_mul_B!(y::Vector{T},A::CauchyLike{T},x::Vector{T}) where T
+function lmult!(y::Vector{T},A::CauchyLike{T},x::Vector{T}) where T
     # Computes y=transpose(A)*x
     dotd= T==ComplexF64 ? BLAS.dotu : BLAS.dot
     n=length(x)
@@ -281,7 +280,7 @@ function At_mul_B!(y::Vector{T},A::CauchyLike{T},x::Vector{T}) where T
     end
 end
 
-function Ac_mul_B!(y::Vector{T},A::CauchyLike{T},x::Vector{T}) where T
+function lmul!(y::Vector{T},A::CauchyLike{T},x::Vector{T}) where T
     # Computes y=Adjoint(A)*x
     dotd= T==ComplexF64 ? BLAS.dotc : BLAS.dot
     n=length(x)
@@ -293,7 +292,7 @@ function Ac_mul_B!(y::Vector{T},A::CauchyLike{T},x::Vector{T}) where T
     end
 end
 
-function Ac_mul_B!(y::Matrix{T},A::CauchyLike{T},x::Matrix{T}) where T
+function lmul!(y::Matrix{T},A::CauchyLike{T},x::Matrix{T}) where T
     # Computes y=adjoint(A)*x
     dotd= T==ComplexF64 ? BLAS.dotc : BLAS.dot
     n=size(x,1)

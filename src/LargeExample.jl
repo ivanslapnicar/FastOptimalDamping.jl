@@ -63,7 +63,7 @@ function f(ρ::Vector)
         if j==2
            U[:,j]-=Φ[l[j+1]+n₁,:]
         end
-        At_mul_B!(y,S,U[:,j])
+        lmult!(y,S,U[:,j])
         Uvec[:,j]=y
         A=CSymDPR1(Λ,y,ComplexF64(ρ[j]))
         Λ,S₁=eigen(A)
