@@ -183,6 +183,11 @@ transpose(A::CauchyLike{T}) where T =CauchyLike(-A.y,-A.x,conj(A.s),conj(A.r))
 adjoint(A::CauchyLike{T}) where T =CauchyLike(conj(-A.y),conj(-A.x),A.s,A.r)
 -(A::CauchyLike{T}) where T =CauchyLike(-A.x,-A.y,A.r,A.s)
 
+function absc(A::CauchyLike{T}) where T
+    B=CauchyLike(A.x,A.y,complex(abs.(A.r)),complex(abs.(A.s)))
+    norm(abs.(Matrix(B)))
+end
+
 
 # Multiplication with CauchyLike
 function *(A::CauchyLike{T}, x::AbstractVector{T}) where T

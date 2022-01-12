@@ -197,25 +197,38 @@ function eigvals(A₁::CSymDPR1)
 
     # Preliminaries
     A=deepcopy(A₁)
+    T = typeof(A.D[1])
+    n₁=length(A.D)
+    λ = Vector{T}(undef,n₁)
+
+    if deflation==true
+        τ=n₁*norm(A)*eps()
+        def=findall(abs.(A.u).<=τ .&& abs.(A.u).<=abs.(A.D)*sqrt(eps()))
+        # println("Deflated eigenvalues",count(def))
+        λ[n₁-length(def)+1:n₁]=A.D[def]
+        deleteat!(A.D,def)
+        deleteat!(A.u,def)
+    end
+
     n = length(A.D)
     m = n
-
-    T = typeof(A.D[1])
+    # println("n = ",n)
 
     # Eigenvalues
-    λ = Vector{T}(undef,n)
     # Auxiliary arrays
     d = Vector{T}(undef,n)
     z = Vector{T}(undef,n)
     Du = Vector{T}(undef,n)
     AD=Vector{T}(undef,n)
     dotd= (T==Float64) ? BLAS.dot : BLAS.dotu
+
     # Tolerance
     tol = 100.0*eps()
     # Maxiter
     maxiter = 101
 
     for l in 1:n
+
         copyto!(AD,A.D)
         # Shift to the absolutely largest pole
         t=1
@@ -277,9 +290,9 @@ function eigvals(A₁::CSymDPR1)
 
     nthreads=Threads.nthreads()
     # nthreads=1
-    z₀ = [Vector{T}(undef,n) for i = 1:nthreads]
-    z₁ = [Vector{T}(undef,n) for i = 1:nthreads]
-    τ = [Vector{T}(undef,n) for i = 1:nthreads]
+    z₀ = [Vector{T}(undef,n₁) for i = 1:nthreads]
+    z₁ = [Vector{T}(undef,n₁) for i = 1:nthreads]
+    τ = [Vector{T}(undef,n₁) for i = 1:nthreads]
     # Threaded loop
     Threads.@threads for l=1:n
         tid=Threads.threadid()
@@ -362,6 +375,7 @@ function traceX(S::CauchyLike{T},s::Int) where T
     Y=CauchyLikeS(S.y,G,conj(G))
     # trace(X)=trace(SYS')=trace(S'(SY))
     S₁=S*Y
+
     traceX=zeros(T,Threads.nthreads())
     Threads.@threads for i=1:2n
         tid=Threads.threadid()
@@ -369,5 +383,5 @@ function traceX(S::CauchyLike{T},s::Int) where T
         getindex!(b[tid],S₁,:,i)
         traceX[tid]+=BLAS.dotc(a[tid],b[tid])
     end
-    return sum(traceX)
+    return sum(traceX),S,Y
 end

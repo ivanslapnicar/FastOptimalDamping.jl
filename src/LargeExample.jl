@@ -4,9 +4,9 @@ K,M=GenerateExamples(example)
 
 # Create DampedSystem structure
 DS=DampedSystem(M,K,[1.0 0;0 1])
-
+println(" K(K,M) = ", cond(inv(sqrt(M))*K*inv(sqrt(M))))
 # Compute changes of basis
-Ω,Φ,Ξ=ChangeOfBasis(DS)
+Ω,Φ,Ξ,Q,Γ,Φ₀=ChangeOfBasis(DS)
 
 # Eigenvalue decomposition of a CSymDPR1 matrix.
 # l is position of damper, ρ is viscosity
@@ -28,7 +28,7 @@ s=27
 function f(ρ::Number)
     A=CSymDPR1(Ξ,Φ[l,:],ComplexF64(ρ))
     Λ,S=eigen(A)
-    Tr=traceX(S,s)
+    Tr,rest=traceX(S,s)
     return real(Tr)
 end
 println("\nTime of trace computation for a single damper.")
@@ -51,11 +51,18 @@ n=2*n₁+1
 U=Matrix{T}(undef,2n,length(l))
 Uvec=Matrix{T}(undef,2n,length(l))
 
+# Standard matrix
+ep1=zeros(n); ep2=zeros(n); ep3=zeros(n)
+ep1[l[1]]=1; ep2[l[2]]=1; ep3[l[3]]=1
+ep2[l[3]+n₁]=-1
+eptimesPhi=[transpose(ep1);transpose(ep2);transpose(ep3)]*Φ₀
+
 function f(ρ::Vector)
     Uvec[:,1]=Φ[l[1],:]
     U[:,1]=Φ[l[1],:]
     A=CSymDPR1(Ξ,Φ[l[1],:],ComplexF64(ρ[1]))
     Λ,S=eigen(A)
+    println("norm(S) = ", norm(Matrix(S))," cond ", cond(Matrix(S)))
     y=similar(Λ)
     # Loop
     for j=2:length(l)
@@ -66,11 +73,21 @@ function f(ρ::Vector)
         lmult!(y,S,U[:,j])
         Uvec[:,j]=y
         A=CSymDPR1(Λ,y,ComplexF64(ρ[j]))
+        println(" A j = ", j," cond ", cond(Matrix(A)))
         Λ,S₁=eigen(A)
+        println(" S₁  j = ", j," cond ", cond(Matrix(S₁)))
         # Multiplication of linked Cauchy-like matrices
         S=S*S₁
     end
-    Tr=traceX(S,s)
+    println(" S j = ", j, " cond ", cond(Matrix(S)))
+
+    Tr, S₀, Y₀=traceX(S,s)
+    X₀=Matrix(S₀)*Matrix(Y₀)*Matrix(S₀)'
+    G₀=[Matrix{Float64}(I,n,s) zeros(n,s);zeros(n,s) Matrix{Float64}(I,n,s)]
+    A₀=Diagonal(Ξ)+transpose(Q)*[zero(Diagonal(Ω)) zero(Diagonal(Ω)); zero(Diagonal(Ω)) transpose(eptimesPhi)*Diagonal(ρ)*eptimesPhi]*Q
+    # Residual
+    no=norm(A₀*X₀+X₀*A₀'+G₀*G₀')/norm(X₀)
+    println(" residual ", no)
     println("ρ = ", ρ," trace = ", Tr)
     return real(Tr)
 end

@@ -20,6 +20,7 @@ function ChangeOfBasis(S::DampedSystem)
     # Γ=diag(Φ'*D_int*Φ)
     α=0.02
     Γ=α*Ω
+
     # Form the matrices Ξ and Q
     Ξ=zeros(T,2n)
     Q=spzeros(T,2n,2n)
@@ -32,6 +33,7 @@ function ChangeOfBasis(S::DampedSystem)
         Q[[k,n+k],k]./=sqrt(Θ[1])
         Q[[k,n+k],n+k]./=sqrt(Θ[2])
     end
+    Φ₀=copy(Φ)
     Φ=Φ*Q[n+1:2n,:]
-    return Ω,Φ,Ξ,Q
+    return Ω,Φ,Ξ,Q,Γ,Φ₀
 end
