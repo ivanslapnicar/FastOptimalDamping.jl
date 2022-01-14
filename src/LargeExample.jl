@@ -79,7 +79,7 @@ function f(ρ::Vector)
         # Multiplication of linked Cauchy-like matrices
         S=S*S₁
     end
-    println(" S j = ", j, " cond ", cond(Matrix(S)))
+    println(" S = "," cond ", cond(Matrix(S)))
 
     Tr, S₀, Y₀=traceX(S,s)
     X₀=Matrix(S₀)*Matrix(Y₀)*Matrix(S₀)'

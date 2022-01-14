@@ -65,7 +65,7 @@ function f(ρ::Vector)
     Uvec[:,1]=Φ[l[1],:]
     U[:,1]=Φ[l[1],:]
     A=CSymDPR1(Ξ,Φ[l[1],:],ComplexF64(ρ[1]))
-    println("norm(A) = ", norm(Matrix(A))," cond ", cond(Matrix(A)))
+    # println("norm(A) = ", norm(Matrix(A))," cond ", cond(Matrix(A)))
     Λ,S=eigen(A)
     println("norm(S) = ", norm(Matrix(S))," cond ", cond(Matrix(S)))
     y=similar(Λ)
@@ -80,7 +80,7 @@ function f(ρ::Vector)
         A=CSymDPR1(Λ,y,ComplexF64(ρ[j]))
         println("j = ", j," norm(A) = ", norm(Matrix(A))," cond ", cond(Matrix(A)))
         Λ,S₁=eigen(A)
-        println("j = ", j," norm(S₁) = ", norm(Matrix(S)), " ", absc(S₁)," cond ", cond(Matrix(S₁)))
+        println("j = ", j," norm(S₁) = ", norm(Matrix(S₁)), " ", absc(S₁)," cond ", cond(Matrix(S₁)))
         # Multiplication of linked Cauchy-like matrices
         S=S*S₁
         println("j = ", j, " norm(S) = ", norm(Matrix(S)), " ", absc(S)," cond ", cond(Matrix(S)))
