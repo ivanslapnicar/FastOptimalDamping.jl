@@ -5,8 +5,8 @@ import LinearAlgebra: mul!, lmul!
 struct CauchyLike{T} <: AbstractMatrix{T}
     x::Vector{T}
     y::Vector{T}
-    r::Array{T}  #ovaj ulaz može biti vektor ili matrica
-    s::Array{T}  #ovaj ulaz može biti vektor ili matrica
+    r::Array{T}  # r can be vector or matrix
+    s::Array{T}  # s can be vector or matrix
 end # struct
 
 size(A::CauchyLike{T}, dim::Integer) where T = dim==1 ? length(A.x) : length(A.y)
@@ -14,8 +14,8 @@ size(A::CauchyLike{T}) where T = size(A,1), size(A,2)
 
 struct CauchyLikeS{T} <: AbstractMatrix{T}
     x::Vector{T}
-    r::AbstractArray{T}  # ovaj ulaz može biti vektor ili matrica
-    s::AbstractArray{T}  # s=conj(r) tako da je kasnije brže
+    r::AbstractArray{T}  # r can be vector or matrix
+    s::AbstractArray{T}  # s=conj(r) to speed up later
 end # struct
 
 # Define its size
